@@ -1,0 +1,133 @@
+Using the MLP Classifier to test data collected from Python Obstacle Course
+# Use Google Colabs preferably 
+# IMPORTING THE DATA FILE (OBSTACLE COURSE RESULTS) - * use the (combined_date(so far).csv) file *
+import pandas as pd 
+#pandas is python data analysis library
+from google.colab import files
+file = files.upload()
+# Reading CSV file data 
+data = pd.read_csv('combined_data(so far).csv', header= 0, encoding = 'utf-8')
+print(data)
+# SEPERATING X AND Y DATA
+# X data = what the algorithm is making predictions from (The Inputs: Time taken, fails, amount of user inputs)
+# Y data = what the algorithm is predicting (The Output: Which obstacle number)
+features = data.iloc[:,2:5] 
+label = data.iloc[:,5] # y data
+print("x data")
+print(features) 
+print("y data")
+print(label)
+# THIS IS FOR SPLITING THE DATASET INTO SUBSETS
+from sklearn.model_selection import train_test_split
+# CALLS ON train_test_split 
+# Split dataset as training and testing to evaluate the model - training (80%) and testing (20%)
+X_trainNN,X_testNN,Y_trainNN,Y_testNN=train_test_split(features,label,test_size=0.20,stratify=label)
+# The MLP Classifier stands for Multilayer Perception and it is for mapping between inputs and outputs with multiple layers of neurons 
+# (trying to replicate a neuron in an artificial way). Therefore, it can act as a Perception but with non-linear inputs and outputs. 
+# Perception alone is for one neuron and cannot be applied for non-linear data. 
+# The MLP Classifier is for non-linear data and can map input data sets to a set of (or one) appropriate outputs.
+from sklearn.neural_network import MLPClassifier
+# Create an instance of MLPClassifier with desired parameters
+# NEW PARAMETERS: 
+clf = MLPClassifier(
+    activation='relu',
+    beta_1=0.9,
+    beta_2=0.999,
+    early_stopping=True,
+    epsilon=1e-08,
+    hidden_layer_sizes=6,
+    learning_rate='constant',
+    max_fun=15000,
+    max_iter=200,
+    n_iter_no_change=4,
+    shuffle=False,
+    solver='adam',
+    tol=0.0001,
+    validation_fraction=0.1,
+    verbose=True
+)
+# ACTIVATION FUNCTION = RECTIFIED LINEAR UNIT (RELU) WHICH IMPOSES THRESHOLD
+# BETA CONTROLS THE EXPONENTIAL DECAY RATES FOR THE FIRST AND SECOND MOMENTS OF THE GRADIENTS IN THE ADAM OPTIMIZER (FOR THIS MLP CLASSIFIER THE OPTIMIZER IS ADAM INSTEAD OF SGD).
+# EARLY STOPPING INDICATES IF THE TRAINING WILL STOP ONCE VALIDATION SCORES STOP IMPROVING
+# EPSILON CONTROLS THE OPTIMIZATION ALGORITHM'S STABILITY
+# HIDDEN LAYER SIZES SPECIFIES THE AMOUNT OF NEURONS IN EACH HIDDEN LAYER OF THE MLP = 8 IN THIS CASE
+# LEARNING RATE = 'constant' means the learning rate remains constant throughout training.
+# LEARNING RATE INIT = INITIAL LEARNING RATE USED IN WEIGHT UPDATES
+# - max_fun: 15000 = This sets the maximum number of function evaluations during training. (SOURCE FOR THIS EXPLINATION ON WORKS CITED PAGE)
+# - max_iter: 200 = This specifies the maximum number of iterations or epochs for training the MLP.(SOURCE FOR THIS EXPLINATION ON WORKS CITED PAGE)
+# OPTIMIZATION FUNCTION = SOLVER IS OPTIMIZATION ALGORITHM USED TO TRAIN. ADAM STANDS FOR ADAPTIVE MOMENT ESTIMATION (COMMON CHOICE).
+# TOL = TOLERANCE FOR OPTIMIZATION ALGORITHM - IF IMPROVEMENT IS BELOW TOLERANCE THE ALGORITHM STOPS RUNNING.
+# VALIDATION FRACTION = PROPORTION OF TRAINING DATA THAT SHOULD BE USED FOR VALIDATION TRAINING 
+  # VALIDATION GETS USED TO MONITOR MODEL'S PERFORMANCE AND OVERFITTING 
+# VERBOSE = IF MLP CLASSIFIER PRINTS PROGRESS MESSAGES
+# Create and fit the MLPClassifier
+clf = MLPClassifier()
+clf.fit(X_trainNN, Y_trainNN)
+# Measure the accuracy
+accuracy = clf.score(X_testNN, Y_testNN)
+#measure the accuracy
+print(accuracy)
+## NOTE SOMETIMES YOU MUST RUN THE "NEW PARAMETERS" MLP CLASSIFER TWICE BEFORE GETTING ACTUAL ACCURACY 
+# RUN THE FOLLOWING AGAIN (AFTER WAITING 20 seconds) IF FIRST ACCURACY SCORE IS LOW:
+from sklearn.neural_network import MLPClassifier
+# Create an instance of MLPClassifier with desired parameters
+# NEW PARAMETERS: 
+clf = MLPClassifier(
+    activation='relu',
+    beta_1=0.9,
+    beta_2=0.999,
+    early_stopping=True,
+    epsilon=1e-08,
+    hidden_layer_sizes=8,
+    learning_rate='constant',
+    max_fun=15000,
+    max_iter=200,
+    n_iter_no_change=4,
+    shuffle=False,
+    solver='adam',
+    tol=0.0001,
+    validation_fraction=0.1,
+    verbose=True
+)
+# Create and fit the MLPClassifier
+clf = MLPClassifier()
+clf.fit(X_trainNN, Y_trainNN)
+
+# Measure the accuracy
+accuracy = clf.score(X_testNN, Y_testNN)
+
+print(accuracy)
+#With the new MLP parameters, the accuracy is fairly accurate!
+#Below is a test set of data. 
+#The amount of time is 12 seconds, the amount of fails is 0, and the amount of inputs is 3. 
+#This set of input data correlates most closely to the output of 1 (which is obstacle 1 which has a default setting of 12 seconds no matter what, generally does not contain many user fails, and the amount of user inputs is generally >= 4).
+predictNN = clf.predict([[12, 0, 3]]) # features of set
+# THE DATA ABOVE SHOULD CORRELATE TO [1] 
+
+print("The prediction is: ")
+print((predictNN))
+# DISPLAYS WHICH QUESTION THE PREDICTION'S OUTPUT CORRELATES TO:
+if predictNN == [1]:
+  print('Bumfuzzled Question')
+  print(' ')
+  print('Solution: The goal of this question is to input Bumfuzzled as many times as possible.')
+elif predictNN == [2]:
+  print('How do you run a program? Question')
+  print(' ')
+  print("Solution: The answer to this question is 'run', 'Run', or 'RUN'")
+elif predictNN == [3]:
+  print('Using the print() function with Jokes! Question')
+  print(' ')
+  print("Solution: The answers are: ")
+  print(" print('Because he was outstanding in his field.')")
+  print(" print('At the quack of dawn.')")
+  print(" print('The North Poll.')")
+elif predictNN == [4]:
+  print('Creating Variables Multiple Choice Questions')
+  print(' ')
+  print("Solution: The answers are: ")
+  print("A")
+  print("C")
+  print("D")
+else:
+  print("There has been an error. Try again. ")
